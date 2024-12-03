@@ -9,7 +9,8 @@ import Button from '../Button/Button.jsx'
 BONUS:
 Aggiungere uno useEffect che mostri un alert quando l’utente clicca sull’apposita checkbox per pubblicare un articolo.*/ 
 
- const inizialFormData = {
+ const initialFormData = {
+    title: "",
     image: undefined,
     content: "",
     tags : "",
@@ -19,7 +20,24 @@ Aggiungere uno useEffect che mostri un alert quando l’utente clicca sull’app
 
 export default function Main() {
 
+  // variabile di stato, formData variabile reattiva
   const [formData,setFormData] = useState(initialFormData)
+
+  function handleFormData(e){
+
+    // ottengo i valori delle chiavi e loro rispettivi valori
+    const key = e.target.name
+    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value
+
+    // duplico l'oggetto,  che mi serve per aggiornare le proprietà di Initial Form Data e far reagire formData
+    
+    const newFormData = {...formData}
+    newFormData[key] = value
+    
+    // aggiorno la mia variabile di stato
+    setFormData(newFormData)
+
+  }
 
   const [publishedPosts, setPublishedPosts ] = useState(posts.filter((post) => post.published === true ))
   const tags = []
@@ -38,27 +56,29 @@ export default function Main() {
 
   })
 
-  const [title,setTitle] = useState('')
+  //const [title,setTitle] = useState('')
 
   function addPost(e) {
     e.preventDefault()
 
-    const newTitle = title.trim()
-    if(newTitle === '') return
+    //const newTitle = title.trim()
+    if(formData.title.trim() === '') return
 
     const post = {
       id: Date.now(),
-      title,
-      image: undefined /* compila questo campo */,
-      content:
-        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit animi unde quasi enim non esse ratione voluptas voluptate, officiis veritatis magni blanditiis possimus nobis cum id inventore corporis deserunt hic.',
-      tags: [],
-      published: true,
+      ...formData,
+      
+    //  image: undefined /* compila questo campo */,
+     // content:
+     //   'Lorem ipsum dolor sit amet consectetur adipisicing elit. Velit animi unde quasi enim non esse ratione voluptas voluptate, officiis veritatis magni blanditiis possimus nobis cum id inventore corporis deserunt hic.',
+      tags: formData.tags.split(',').map((tag) => tag.trim())
+     // published: true,
     }
 
     setPublishedPosts([...publishedPosts,post])
-    setTitle('')
-
+    setFormData(initialFormData) // resetto il form
+    //setTitle('')
+     
   }
 
   function deletePost(id) {
@@ -76,21 +96,28 @@ export default function Main() {
           {/*
           <form onSubmit={addPost} action="" className='inline-form'>
             <input value={title} onChange={(e) => setTitle(e.target.value)} type="text" placeholder='Titolo del post' />
-            <Button text='Salva' /> 
-          </form>*/ }
+            
+          </form> */}
+
+
           <form className='form-post' onSubmit={addPost} action=''>
             <h2>Aggiungi un nuovo post</h2>
+            <div className='form-field'>
+              <label htmlFor="title">titolo</label>
+              <input id="title" type="text"  name="title" onChange={handleFormData}  value={formData.title} placeholder="scrivi il titolo" />
+              <Button text='Salva' /> 
+            </div>
             <div className="form-field">
               <label htmlFor="image">immagine</label>
-              <input id="image" type="text"  name="image"  value={formData.image} placeholder="carica un'immagine" />
+              <input id="image" type="text"  name="image" onChange={handleFormData} value={formData.image} placeholder="carica un'immagine" />
             </div>
             <div className="form-field">
               <label htmlFor="content">Contenuto</label>
-              <input id="content" type="text"  name="content"  value={formData.content} placeholder="scrivi una descrizione" />
+              <input id="content" type="text"  name="content" onChange={handleFormData} value={formData.content} placeholder="scrivi una descrizione" />
             </div>
             <div>
               <label htmlFor="category">Scegli un categoria</label>
-              <select name="category" id="category" value={formData.category}>
+              <select name="category" id="category" onChange={handleFormData} value={formData.category}>
                 <option value="Automotive">Automotive</option>
                 <option value="Tech">Tech</option>
                 <option value="Sport">Sport</option>
@@ -98,11 +125,11 @@ export default function Main() {
             </div>
             <div className="form-field">
               <label htmlFor="tags">Contenuto</label>
-              <input id="tags" type="text"  name="tags"  value={formData.tags} placeholder="scrivi un'etichetta" />
+              <input id="tags" type="text"  name="tags" onChange={handleFormData} value={formData.tags} placeholder="scrivi un'etichetta" />
             </div>
             <div className="form-field form-field-inline">
-              <input name='published' id="published" type="checkbox" />
-              <label htmlFor="published">Disponibilità</label>
+              <input onChange={handleFormData} checked={formData.published} name='published' id="isPublished" type="checkbox" />
+              <label htmlFor="isPublished">Disponibilità</label>
             </div>
             <input type='submit' value="Aggiungi il Post"></input>
           </form>
